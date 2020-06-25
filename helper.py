@@ -1,6 +1,7 @@
 import torch
 import time
 import numpy as np
+from PIL import Image
 import matplotlib.pyplot as plt
 
 def plot_batch(img_batch,classes,labels=None,preds=None,normalize=False):
@@ -14,8 +15,8 @@ def plot_batch(img_batch,classes,labels=None,preds=None,normalize=False):
     """
 
     ## parameters w.r.t normalization | change w.r.t img
-    mean = np.array([0.5,0.5,0.5])
-    std = np.array([0.5,0.5,0.5])
+    mean = np.array([0.5])
+    std = np.array([0.5])
     ## parameters for plot
     n_rows = 2
     n_cols = len(img_batch)/n_rows 
@@ -24,7 +25,7 @@ def plot_batch(img_batch,classes,labels=None,preds=None,normalize=False):
     
     for idx in range(len(img_batch)):
         ax = fig.add_subplot(n_rows,n_cols,idx+1,xticks=[],yticks=[])
-        image = img_batch[idx].numpy().transpose((2,1,0))
+        image = img_batch[idx].numpy().transpose(2,1,0)
         if normalize:
             image = std + image * mean
         ax.imshow(image,cmap="gray")
@@ -111,3 +112,14 @@ def predict(img,classes,labels,model,device="cpu"):
     _,preds = torch.max(output,dim=1)
     img = img.to("cpu")
     plot_batch(img,classes,labels,preds,normalize=True)
+
+def predict_image(image_path,model,transform,device,classes):
+    img = Image.open(image_path)
+    plt.imshow(img)
+    img_tensor = transform(img)
+    img_tensor = torch.stack([img_tensor])
+    img_tensor = img_tensor.to(device)
+    output = model(img_tensor)
+    _,preds = torch.max(output,dim=1)
+    plt.title(classes[preds.item()])
+    plt.show()
