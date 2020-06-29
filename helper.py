@@ -15,8 +15,8 @@ def plot_batch(img_batch,classes,labels=None,preds=None,normalize=False):
     """
 
     ## parameters w.r.t normalization | change w.r.t img
-    mean = np.array([0.5])
-    std = np.array([0.5])
+    mean = np.array([0.5,0.5,0.5])
+    std = np.array([0.5,0.5,0.5])
     ## parameters for plot
     n_rows = 2
     n_cols = len(img_batch)/n_rows 
@@ -27,8 +27,9 @@ def plot_batch(img_batch,classes,labels=None,preds=None,normalize=False):
         ax = fig.add_subplot(n_rows,n_cols,idx+1,xticks=[],yticks=[])
         image = img_batch[idx].numpy().transpose(2,1,0)
         if normalize:
-            image = std + image * mean
-        ax.imshow(image,cmap="gray")
+            image = std * image + mean
+            image = np.clip(image,0,1)
+        ax.imshow(image)
         if labels is not None and preds is not None:
             ax.set_title(f"Predicted: {classes[labels[idx].item()]}",
             c=("green" if labels[idx] == preds[idx] else "red"))
